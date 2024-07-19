@@ -21,19 +21,31 @@ class Task(models.Model):
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    gems = models.IntegerField(default=0)
-    daily_task_limit = models.IntegerField(default=5)  # New field for task limit
-    task_limit_increases = models.IntegerField(default=0)  # New field to track purchases
+    gems = models.IntegerField(default=0)  # This will now represent current_gems
+    all_time_gems = models.IntegerField(default=0)  # New field for all-time gems
+    daily_task_limit = models.IntegerField(default=5)
+    task_limit_increases = models.IntegerField(default=0)
 
     def get_next_task_limit_price(self):
         base_price = 3
-        return base_price + (self.task_limit_increases * 2)  # Price increases by 2 each time
+        return base_price + (self.task_limit_increases * 2)
 
     def increase_task_limit(self):
         self.daily_task_limit += 1
         self.task_limit_increases += 1
         self.save()
-        
+
+    def add_gems(self, amount):
+        self.gems += amount
+        self.all_time_gems += amount
+        self.save()
+
+    def spend_gems(self, amount):
+        if self.gems >= amount:
+            self.gems -= amount
+            self.save()
+            return True
+        return False
 class ShopItem(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()

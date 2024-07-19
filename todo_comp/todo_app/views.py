@@ -78,8 +78,7 @@ def task_list(request):
             task.completion_date = today
             task.save()
             profile = request.user.userprofile
-            profile.gems += 1
-            profile.save()
+            profile.add_gems(1)  # This method now updates both current_gems and all_time_gems
         return redirect('task_list')
 
     return render(request, 'todo_app/task_list.html', {
@@ -119,7 +118,8 @@ def profile_view(request, username):
         'profile_user': user,
         'grouped_tasks': grouped_tasks,
         'tasks_left_today': tasks_left_today,
-        'gems': user.userprofile.gems,
+        'current_gems': user.userprofile.gems,  # Changed from current_gems to gems
+        'all_time_gems': user.userprofile.all_time_gems,
         'page_obj': page_obj,
         'daily_task_limit': user.userprofile.daily_task_limit,
     })
@@ -140,10 +140,7 @@ def tasks_by_date(request, username, date):
 
 @login_required
 def leaderboard(request):
-    # Get all user profiles ordered by gem count (descending)
-    all_profiles = UserProfile.objects.all().order_by('-gems')
-
-    # Set up pagination
+    all_profiles = UserProfile.objects.all().order_by('-all_time_gems')
     paginator = Paginator(all_profiles, 10)  # Show 10 users per page
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -152,6 +149,7 @@ def leaderboard(request):
         "leaderboard_data": page_obj,
         "page_obj": page_obj
     })
+
 
 @login_required
 def shop(request):
@@ -176,12 +174,8 @@ def purchase_item(request, item_id):
     item = get_object_or_404(ShopItem, id=item_id)
     user_profile = request.user.userprofile
 
-    if user_profile.gems >= item.price:
-        user_profile.gems -= item.price
-        user_profile.save()
-
+    if user_profile.spend_gems(item.price):  # This method now uses the gems field
         Purchase.objects.create(user=request.user, item=item)
-
         messages.success(request, f'You have successfully purchased {item.name}!')
     else:
         messages.error(request, 'You do not have enough gems to purchase this item.')
