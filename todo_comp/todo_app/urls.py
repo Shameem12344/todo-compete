@@ -13,4 +13,13 @@ urlpatterns = [
     path('shop/', views.shop, name='shop'),
     path('purchase/<int:item_id>/', views.purchase_item, name='purchase_item'),
 
+
+# New group-related URLs
+    path('groups/', views.group_list, name='group_list'),
+    path('groups/create/', views.create_group, name='create_group'),
+    path('groups/<int:group_id>/', views.group_detail, name='group_detail'),
+    path('groups/<int:group_id>/join/', views.join_group, name='join_group'),
+    path('groups/<int:group_id>/leave/', views.leave_group, name='leave_group'),
+    path('groups/leaderboard/', views.group_leaderboard, name='group_leaderboard'),
 ]
+

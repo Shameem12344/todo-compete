@@ -47,4 +47,9 @@
 {% else %}
     <p>No users found.</p>
 {% endif %}
+
+{% if show_group_leaderboard %}
+    <a href="{% url 'group_leaderboard' %}" class="btn btn-primary">View Group Leaderboard</a>
+{% endif %}
+
 {% endblock %}

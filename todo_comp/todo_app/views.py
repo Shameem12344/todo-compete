@@ -6,7 +6,7 @@ from django.http import JsonResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.utils import timezone
 from django.core.paginator import Paginator
-from .models import User, Task, UserProfile, ShopItem, Purchase
+from .models import User, Task, UserProfile, ShopItem, Purchase, Group
 from datetime import datetime
 from django.contrib import messages
 from django.db import transaction
@@ -84,7 +84,8 @@ def task_list(request):
     return render(request, 'todo_app/task_list.html', {
         'tasks': tasks,
         'tasks_left_today': tasks_left_today,
-        'daily_task_limit': daily_limit
+        'daily_task_limit': daily_limit,
+        'current_group': request.user.userprofile.current_group,
     })
 
 @login_required
@@ -122,6 +123,8 @@ def profile_view(request, username):
         'all_time_gems': user.userprofile.all_time_gems,
         'page_obj': page_obj,
         'daily_task_limit': user.userprofile.daily_task_limit,
+        'current_group': user.userprofile.current_group,
+
     })
 
 @login_required
@@ -147,7 +150,8 @@ def leaderboard(request):
 
     return render(request, "todo_app/leaderboard.html", {
         "leaderboard_data": page_obj,
-        "page_obj": page_obj
+        "page_obj": page_obj,
+        "show_group_leaderboard": True,
     })
 
 
@@ -166,6 +170,7 @@ def shop(request):
     return render(request, 'todo_app/shop.html', {
         'items': items,
         'item_prices': item_prices,
+        'in_group': request.user.userprofile.current_group is not None,
     })
 
 @login_required
@@ -181,3 +186,48 @@ def purchase_item(request, item_id):
         messages.error(request, 'You do not have enough gems to purchase this item.')
 
     return redirect('shop')
+
+@login_required
+def create_group(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        group = Group.objects.create(name=name, description=description, creator=request.user)
+        group.members.add(request.user)
+        request.user.userprofile.current_group = group
+        request.user.userprofile.save()
+        return redirect('group_detail', group_id=group.id)
+    return render(request, 'todo_app/create_group.html')
+
+@login_required
+def join_group(request, group_id):
+    group = get_object_or_404(Group, id=group_id)
+    if request.user not in group.members.all():
+        group.members.add(request.user)
+        request.user.userprofile.current_group = group
+        request.user.userprofile.save()
+    return redirect('group_detail', group_id=group.id)
+
+@login_required
+def leave_group(request, group_id):
+    group = get_object_or_404(Group, id=group_id)
+    if request.user in group.members.all():
+        group.members.remove(request.user)
+        request.user.userprofile.current_group = None
+        request.user.userprofile.save()
+    return redirect('group_list')
+
+@login_required
+def group_detail(request, group_id):
+    group = get_object_or_404(Group, id=group_id)
+    return render(request, 'todo_app/group_detail.html', {'group': group})
+
+@login_required
+def group_list(request):
+    groups = Group.objects.all()
+    return render(request, 'todo_app/group_list.html', {'groups': groups})
+
+@login_required
+def group_leaderboard(request):
+    groups = Group.objects.all().annotate(total_gems=sum('members__userprofile__all_time_gems')).order_by('-total_gems')
+    return render(request, 'todo_app/group_leaderboard.html', {'groups': groups})

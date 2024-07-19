@@ -1,0 +1,18 @@
+{% extends 'todo_app/layout.html' %}
+
+{% block content %}
+<h2>Group Leaderboard</h2>
+<ul class="list-group">
+    {% for group in groups %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+        <span>
+            {{ forloop.counter }}.
+            <a href="{% url 'group_detail' group.id %}">{{ group.name }}</a>
+        </span>
+        <span class="badge bg-primary rounded-pill">{{ group.total_gems }} gems</span>
+    </li>
+    {% empty %}
+    <li class="list-group-item">No groups available.</li>
+    {% endfor %}
+</ul>
+{% endblock %}
