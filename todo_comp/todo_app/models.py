@@ -19,12 +19,28 @@ class Task(models.Model):
             self.completion_date = timezone.now().date()
         super().save(*args, **kwargs)
 
+class Group(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True)
+    creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_groups')
+    members = models.ManyToManyField(User, related_name='joined_groups')
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    @property
+    def total_gems(self):
+        return sum(member.userprofile.all_time_gems for member in self.members.all())
+    
+    def __str__(self):
+        return self.name
+    
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     gems = models.IntegerField(default=0)  # This will now represent current_gems
     all_time_gems = models.IntegerField(default=0)  # New field for all-time gems
     daily_task_limit = models.IntegerField(default=5)
     task_limit_increases = models.IntegerField(default=0)
+    current_group = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True, blank=True, related_name='current_members')
+
 
     def get_next_task_limit_price(self):
         base_price = 3
@@ -74,3 +90,4 @@ def apply_purchase_effect(sender, instance, created, **kwargs):
         if instance.item.effect == 'increase_task_limit':
             instance.user.userprofile.daily_task_limit += 1
             instance.user.userprofile.save()
+
