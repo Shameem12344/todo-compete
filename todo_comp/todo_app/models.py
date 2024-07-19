@@ -33,10 +33,7 @@ class Group(models.Model):
     @property
     def total_gems(self):
         return self.members.aggregate(total=Sum('userprofile__all_time_gems'))['total'] or 0
-    
-    def update_total_gems(self):
-        self.total_gems = self.members.aggregate(total=Sum('userprofile__all_time_gems'))['total'] or 0
-        self.save()
+
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -46,6 +43,16 @@ class UserProfile(models.Model):
     task_limit_increases = models.IntegerField(default=0)
     current_group = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True, blank=True, related_name='current_members')
 
+    # Signals to create a UserProfile when a new User is created
+
+    @receiver(post_save, sender=User)
+    def create_user_profile(sender, instance, created, **kwargs):
+        if created:
+            UserProfile.objects.create(user=instance)
+
+    @receiver(post_save, sender=User)
+    def save_user_profile(sender, instance, **kwargs):
+        instance.userprofile.save()
 
     def get_next_task_limit_price(self):
         base_price = 3
@@ -78,17 +85,6 @@ class Purchase(models.Model):
     item = models.ForeignKey(ShopItem, on_delete=models.CASCADE)
     purchased_at = models.DateTimeField(auto_now_add=True)
 
-# Signals to create a UserProfile when a new User is created
-
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    if created:
-        UserProfile.objects.create(user=instance)
-
-@receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
-    instance.userprofile.save()
-
 @receiver(post_save, sender=Purchase)
 def apply_purchase_effect(sender, instance, created, **kwargs):
     if created:
@@ -99,5 +95,6 @@ def apply_purchase_effect(sender, instance, created, **kwargs):
 # Signal to update the group's total gems when a user's gems changes
 @receiver(post_save, sender=UserProfile)
 def update_group_gems(sender, instance, **kwargs):
-    if instance.current_group:
-        instance.current_group.update_total_gems()
+    # This signal is no longer needed, but we'll keep it empty for now
+    # in case you want to add any other logic when a UserProfile is saved
+    pass

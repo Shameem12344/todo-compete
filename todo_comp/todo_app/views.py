@@ -11,7 +11,9 @@ from datetime import datetime
 from django.contrib import messages
 from django.db import transaction
 from django.db.models import Sum
+import logging
 
+logger = logging.getLogger(__name__)
 
 def index(request):
     if request.user.is_authenticated:
@@ -23,11 +25,14 @@ def login_view(request):
     if request.method == "POST":
         username = request.POST["username"]
         password = request.POST["password"]
+        logger.info(f"Attempting to log in user: {username}")
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
+            logger.info(f"User logged in successfully: {user.id}")
             return HttpResponseRedirect(reverse("index"))
         else:
+            logger.warning(f"Failed login attempt for username: {username}")
             return render(request, "todo_app/login.html", {
                 "message": "Invalid username and/or password."
             })
@@ -43,24 +48,35 @@ def register(request):
         username = request.POST["username"]
         password = request.POST["password"]
         confirmation = request.POST["confirmation"]
+        logger.info(f"Attempting to register user: {username}")
+
         if password != confirmation:
+            logger.warning("Password mismatch")
             return render(request, "todo_app/register.html", {
                 "message": "Passwords must match."
             })
 
         try:
-            user = User.objects.create_user(username=username, password=password)
-            user.save()
-            UserProfile.objects.create(user=user)
+            with transaction.atomic():
+                user = User.objects.create_user(username=username, password=password)
+                logger.info(f"User created: {user.id}")
+                # We don't need to explicitly create UserProfile if it's handled by a signal
+                login(request, user)
+                logger.info(f"User logged in: {user.id}")
+            return HttpResponseRedirect(reverse("index"))
         except IntegrityError as e:
+            logger.error(f"IntegrityError during registration: {str(e)}", exc_info=True)
             return render(request, "todo_app/register.html", {
-                "message": "Username already taken."
+                "message": f"Username already taken. Please choose a different username."
             })
-        login(request, user)
-        return HttpResponseRedirect(reverse("index"))
+        except Exception as e:
+            logger.error(f"Unexpected error during registration: {str(e)}", exc_info=True)
+            return render(request, "todo_app/register.html", {
+                "message": f"An unexpected error occurred: {str(e)}"
+            })
     else:
         return render(request, "todo_app/register.html")
-
+    
 @login_required
 def task_list(request):
     today = timezone.now().date()
