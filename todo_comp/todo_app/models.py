@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
+from django.db.models import Sum
 
 class User(AbstractUser):
     pass
@@ -25,14 +26,18 @@ class Group(models.Model):
     creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_groups')
     members = models.ManyToManyField(User, related_name='joined_groups')
     created_at = models.DateTimeField(auto_now_add=True)
-    
-    @property
-    def total_gems(self):
-        return sum(member.userprofile.all_time_gems for member in self.members.all())
-    
+
     def __str__(self):
         return self.name
     
+    @property
+    def total_gems(self):
+        return self.members.aggregate(total=Sum('userprofile__all_time_gems'))['total'] or 0
+    
+    def update_total_gems(self):
+        self.total_gems = self.members.aggregate(total=Sum('userprofile__all_time_gems'))['total'] or 0
+        self.save()
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     gems = models.IntegerField(default=0)  # This will now represent current_gems
@@ -91,3 +96,8 @@ def apply_purchase_effect(sender, instance, created, **kwargs):
             instance.user.userprofile.daily_task_limit += 1
             instance.user.userprofile.save()
 
+# Signal to update the group's total gems when a user's gems changes
+@receiver(post_save, sender=UserProfile)
+def update_group_gems(sender, instance, **kwargs):
+    if instance.current_group:
+        instance.current_group.update_total_gems()

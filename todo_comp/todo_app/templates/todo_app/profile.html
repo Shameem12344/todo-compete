@@ -6,14 +6,6 @@
 <p>All-time Gems: {{ all_time_gems }}</p>
 
 <h3>Tasks Left for Today: {{ tasks_left_today }}</h3>
-<h3>Group Information</h3>
-
-{% if current_group %}
-    <p>Current Group: <a href="{% url 'group_detail' current_group.id %}">{{ current_group.name }}</a></p>
-{% else %}
-    <p>Not currently in a group</p>
-{% endif %}
-<a href="{% url 'group_list' %}" class="btn btn-primary">View All Groups</a>
 
 <h3>Pending Tasks for Today</h3>
 {% if pending_tasks_today %}
@@ -83,4 +75,13 @@
 {% else %}
     <p>No completed tasks.</p>
 {% endif %}
+<h3>Group Information</h3>
+
+{% if current_group %}
+    <p>Current Group: <a href="{% url 'group_detail' current_group.id %}">{{ current_group.name }}</a></p>
+{% else %}
+    <p>Not currently in a group</p>
+{% endif %}
+<a href="{% url 'group_list' %}" class="btn btn-primary">View All Groups</a>
+
 {% endblock %}

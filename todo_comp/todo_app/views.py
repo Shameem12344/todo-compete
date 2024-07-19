@@ -10,6 +10,8 @@ from .models import User, Task, UserProfile, ShopItem, Purchase, Group
 from datetime import datetime
 from django.contrib import messages
 from django.db import transaction
+from django.db.models import Sum
+
 
 def index(request):
     if request.user.is_authenticated:
@@ -229,5 +231,27 @@ def group_list(request):
 
 @login_required
 def group_leaderboard(request):
-    groups = Group.objects.all().annotate(total_gems=sum('members__userprofile__all_time_gems')).order_by('-total_gems')
-    return render(request, 'todo_app/group_leaderboard.html', {'groups': groups})
+    groups = Group.objects.all()
+    groups_with_gems = []
+
+    for group in groups:
+        total_gems = group.members.aggregate(total=Sum('userprofile__all_time_gems'))['total'] or 0
+        groups_with_gems.append({
+            'group': group,
+            'total_gems': total_gems,
+            'members_count': group.members.count()
+        })
+
+    # Sort the groups by total gems
+    groups_with_gems = sorted(groups_with_gems, key=lambda x: x['total_gems'], reverse=True)
+
+    # Pagination
+    paginator = Paginator(groups_with_gems, 10)  # Show 10 groups per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'todo_app/group_leaderboard.html', {
+        'groups': page_obj,
+        'page_obj': page_obj,
+        'is_paginated': page_obj.has_other_pages()
+    })
