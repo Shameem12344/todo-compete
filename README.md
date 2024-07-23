@@ -12,14 +12,14 @@ Video demo at: https://youtu.be/5X8T8Yz9N2E
     * Settings
     * template tags
 * How to run todo-compete
-* [Distinctiveness and complexity](#Distinctiveness)
+* [Distinctiveness and complexity](#Distinctiveness#and#complexity)
 * [Extras](#Extras)
 
 # Introduction 
 So the reason I created this app was due to the productivity and the growth I have had as an individual since I got a planner and started to write down each thing I was going to accomplish in the day. This sparked my interest to create a to-do styled app where the user types the goals they have each day and is rewarded for what they complete. The app stresses the idea that if you are cheating or lying for points you are only hurting yourself. The app aims at promoting a sense of urgency and productivity within individuals while also fostering a sense of community.
 
 
-# Distinctiveness
+# Distinctiveness and complexity
 Todo_Compete has a group feature which is different from anything we did in the social network where people can create and join groups where they can see each other's daily tasks and hold each other accountable.
 It also has countless other features that seperate it from anything we have done in this course.
 - This app proves its distinct and complex nature through the:
