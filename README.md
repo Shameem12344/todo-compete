@@ -1,7 +1,7 @@
 Video demo at: https://youtu.be/5X8T8Yz9N2E
 
 # Table of Contents
-* Introduction(#introduction)
+* [Introduction](#introduction)
 * Code and organization
     * Templates
     * Models
