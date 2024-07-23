@@ -12,7 +12,7 @@ Video demo at: https://youtu.be/5X8T8Yz9N2E
     * Settings
     * template tags
 * How to run todo-compete
-* [Distinctiveness and complexity](#Distinctiveness)
+* [Distinctiveness and complexity](#Distinctiveness_and_complexity)
 * [Extras](#Extras)
 
 # Introduction 
