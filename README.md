@@ -95,8 +95,10 @@ Had to add these two in the settings also STATICFILES_DIRS = [BASE_DIR / 'static
 # How to run todo-compete
 
 1. Install requirements
-This step might not be necessary as I only used base Django: 
-`pip install -r requirements.txt`
+This step might not be necessary as I only used base Django:
+```
+pip install -r requirements.txt
+```
 
 3. Make migrations:
 ```
@@ -104,10 +106,13 @@ python manage.py makemigrations
 python manage.py migrate
 ```
 3. Create superuser(Optional)
-`python manage.py createsuperuser`
-
-4. Run server:
-`python manage.py runserver`
+```
+python manage.py createsuperuser
+```
+5. Run server:
+```
+python manage.py runserver
+```
 # Distinctiveness and complexity
 Todo_Compete has a group feature which is different from anything we did in the social network where people can create and join groups where they can see each other's daily tasks and hold each other accountable.
 It also has countless other features that seperate it from anything we have done in this course.
