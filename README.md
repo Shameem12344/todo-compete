@@ -3,15 +3,15 @@ Video demo at: https://youtu.be/5X8T8Yz9N2E
 # Table of Contents
 * [Introduction](#introduction)
 * [Code and organization](#Code-and-organization)
-    * Templates
-    * Models
-    * Views
-    * Urls
-    * Static
-    * context_processors
-    * templatetags
-    * Settings
-* How to run todo-compete
+    * [Templates](#Templates)
+    * [Models](#Models)
+    * [Views](#Views)
+    * [Urls](#Urls)
+    * [Static](#Static)
+    * [context_processors](#context-processors)
+    * [templatetags](#templatetags)
+    * [Settings](#Settings)
+* [How to run todo-compete](#)
 * [Distinctiveness and complexity](#Distinctiveness-and-complexity)
 * [Extras](#Extras)
    * [Shell command](#Shell-command)
@@ -27,19 +27,19 @@ The todo-Compete app is in this following structure.
 
 ## Templates
 My templates page consists of 13 html files which make up the front end of my application. Each are self explanatory with the title given to them:
-1. 
-2. 
-3. 
-4. 
-5.
-6. 
-7.
-8.
-9.
-10
-11.
-12.
-13.
+1. create_group.html
+2. group_detail.html
+3. group_leaderboard.html
+4. group_list.html
+5. layout.html
+6. leaderboard.html
+7. login.html
+8. logout.html
+9. profile.html
+10. register.html
+11. shop.html
+12. task_list.html
+13. tasks_by_date.html
 
 ## Models
 In models.py I created 6 models that incorported many functions within them and some decorators and properties.
